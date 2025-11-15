@@ -1,0 +1,12 @@
+[package]
+name = "nodescope-cli"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[dependencies]
+daemon = { path = "../daemon" }
+
+anyhow = { workspace = true }
+clap = { workspace = true }
+tokio = { workspace = true }
