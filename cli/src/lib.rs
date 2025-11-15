@@ -1,7 +1,23 @@
+mod config;
+
+use std::path::PathBuf;
+
+use anyhow::Context;
 use clap::{Parser, Subcommand};
+
+use crate::config::Config;
 
 #[derive(Parser)]
 struct Cli {
+    #[clap(
+        short,
+        long,
+        env = "NODESCOPE_CONFIG",
+        default_value = "nodescope.yml",
+        value_name = "FILE"
+    )]
+    config: PathBuf,
+
     #[clap(subcommand)]
     command: Option<Commands>,
 }
@@ -16,13 +32,29 @@ pub async fn run() -> anyhow::Result<()> {
 
     match cli.command.unwrap_or(Commands::Run) {
         Commands::Run => {
-            run_app().await?;
+            let config = Config::init(cli.config)?;
+            run_app(config).await?;
         }
     }
 
     Ok(())
 }
 
-async fn run_app() -> anyhow::Result<()> {
-    daemon::run().await
+async fn run_app(config: Config) -> anyhow::Result<()> {
+    let app = app::NodeScopeApp::new();
+
+    tokio::try_join!(
+        async {
+            proxy::run(config.proxy.clone(), app.clone())
+                .await
+                .context("proxy server error")
+        },
+        async {
+            server::run(config.server.clone(), app.clone())
+                .await
+                .context("server error")
+        }
+    )?;
+
+    Ok(())
 }
