@@ -1,4 +1,4 @@
-# NodeScope — Total Visibility for your Bitcoin Nodes.
+# NodeScope: Total Visibility for your Bitcoin Nodes
 
 Running a Bitcoin node is powerful, but also opaque. You know it's syncing, you know it's connected, but *what exactly is going on under the hood?*
 
