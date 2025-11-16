@@ -32,7 +32,10 @@ pub async fn run(config: ServerConfig, app: NodeScopeApp) -> anyhow::Result<()> 
 
     let listener =
         tokio::net::TcpListener::bind(&std::net::SocketAddr::from(([0, 0, 0, 0], port))).await?;
+
+    println!("UI and GraphQL server running on port {}", port);
     axum::serve(listener, app.into_make_service()).await?;
+
     Ok(())
 }
 
