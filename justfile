@@ -1,3 +1,9 @@
+build-dashboard:
+    pushd dashboard && pnpm install && pnpm run build && popd
+
+build:
+    cargo build
+
 check-code: build-dashboard
     cargo check
     cargo fmt --check --all
@@ -5,11 +11,5 @@ check-code: build-dashboard
     cargo audit
     cargo deny check
 
-build-dashboard:
-    pushd dashboard && pnpm install && pnpm run build && popd
-
-build:
-    cargo build
-
-e2e: build
+e2e: build-dashboard build
     ./scripts/run-e2e.sh
