@@ -1,12 +1,14 @@
-check-code:
+check-code: build-dashboard
     cargo check
     cargo fmt --check --all
     cargo clippy --all
     cargo audit
     cargo deny check
 
-build:
+build-dashboard:
     pushd dashboard && pnpm install && pnpm run build && popd
+
+build:
     cargo build
 
 e2e: build
