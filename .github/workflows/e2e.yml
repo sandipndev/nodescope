@@ -1,0 +1,15 @@
+name: e2e
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-code:
+    name: e2e
+    runs-on: ubuntu-latest
+    steps:
+      - uses: DeterminateSystems/nix-installer-action@v4
+      - uses: DeterminateSystems/magic-nix-cache-action@v8
+      - uses: actions/checkout@v4
+      - run: nix develop -c just e2e

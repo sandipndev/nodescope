@@ -5,8 +5,12 @@ edition = "2024"
 license = "MIT"
 
 [dependencies]
-daemon = { path = "../daemon" }
+app = { path = "../app" }
+proxy = { path = "../proxy" }
+server = { path = "../server" }
 
 anyhow = { workspace = true }
 clap = { workspace = true }
+serde = { workspace = true }
+serde_yaml = { workspace = true }
 tokio = { workspace = true }

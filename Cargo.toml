@@ -1,14 +1,28 @@
 [workspace]
 resolver = "2"
 members = [
+  "app",
   "cli",
-  "daemon",
-  "proxy"
+  "proxy",
+  "server"
 ]
 
 [workspace.dependencies]
 anyhow = "1.0.100"
+async-graphql = { version = "7.0.17", default-features = false, features = [
+  "dataloader",
+  "chrono",
+  "playground",
+  "tempfile",
+] }
+async-graphql-axum = "7.0.17"
+axum = { version = "0.8.6", features = ["macros"] }
 clap = { version = "4.5.51", features = ["derive", "env"] }
+mime_guess = "2.0"
+rust-embed = "8"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_yaml = "0.9.32"
+serde_json = "1.0.145"
 tokio = { version = "1.48.0", features = [
   "rt-multi-thread",
   "macros",
@@ -16,3 +30,4 @@ tokio = { version = "1.48.0", features = [
   "sync",
   "signal",
 ] }
+tower-http = "0.6.5"
