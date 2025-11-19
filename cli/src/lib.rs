@@ -28,6 +28,12 @@ enum Commands {
 }
 
 pub async fn run() -> anyhow::Result<()> {
+    // Initialize tracing subscriber to output logs to console
+    tracing_subscriber::fmt()
+        .with_target(false)
+        .with_level(true)
+        .init();
+
     let cli = Cli::parse();
 
     match cli.command.unwrap_or(Commands::Run) {

@@ -1,0 +1,7 @@
+proxy:
+  port: 6788
+  network: mainnet
+
+server:
+  port: 6789
+

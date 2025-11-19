@@ -29,5 +29,9 @@ tokio = { version = "1.48.0", features = [
   "time",
   "sync",
   "signal",
+  "net",
+  "io-util",
 ] }
 tower-http = "0.6.5"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }

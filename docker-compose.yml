@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  bitcoin:
+    image: bitcoin/bitcoin:latest
+    container_name: bitcoin-node
+    ports:
+      - "8333:8333"
+    command: >
+      bitcoind
+      -printtoconsole
+      -proxy=host.docker.internal:6788
+    restart: unless-stopped
