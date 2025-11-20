@@ -31,8 +31,6 @@ export const PEER_CONNECTIONS_QUERY = `
       disconnectedAt
       bytesInbound
       bytesOutbound
-      messagesInbound
-      messagesOutbound
     }
   }
 `
@@ -48,8 +46,54 @@ export const ACTIVE_CONNECTIONS_QUERY = `
       disconnectedAt
       bytesInbound
       bytesOutbound
-      messagesInbound
-      messagesOutbound
+    }
+  }
+`
+
+export const MESSAGES_BY_CONNECTION_QUERY = `
+  query GetMessagesByConnection($connectionId: Int!) {
+    messagesByConnection(connectionId: $connectionId) {
+      id
+      connectionId
+      timestamp
+      direction
+      sourcePeer
+      destinationPeer
+      messageType
+      payloadSize
+      description
+    }
+  }
+`
+
+export const RECENT_MESSAGES_QUERY = `
+  query GetRecentMessages($limit: Int = 100) {
+    recentMessages(limit: $limit) {
+      id
+      connectionId
+      timestamp
+      direction
+      sourcePeer
+      destinationPeer
+      messageType
+      payloadSize
+      description
+    }
+  }
+`
+
+export const MESSAGES_BY_PEER_QUERY = `
+  query GetMessagesByPeer($peerAddr: String!) {
+    messagesByPeer(peerAddr: $peerAddr) {
+      id
+      connectionId
+      timestamp
+      direction
+      sourcePeer
+      destinationPeer
+      messageType
+      payloadSize
+      description
     }
   }
 `
@@ -77,8 +121,18 @@ export interface PeerConnection {
   disconnectedAt?: string | null
   bytesInbound?: number | null
   bytesOutbound?: number | null
-  messagesInbound?: number | null
-  messagesOutbound?: number | null
+}
+
+export interface Message {
+  id: number
+  connectionId: number
+  timestamp: string
+  direction: string
+  sourcePeer: string
+  destinationPeer: string
+  messageType: string
+  payloadSize: number
+  description: string
 }
 
 export interface ConnectionStats {
@@ -100,5 +154,17 @@ export interface ActiveConnectionsResponse {
 
 export interface ConnectionStatsResponse {
   connectionStats: ConnectionStats
+}
+
+export interface MessagesByConnectionResponse {
+  messagesByConnection: Message[]
+}
+
+export interface RecentMessagesResponse {
+  recentMessages: Message[]
+}
+
+export interface MessagesByPeerResponse {
+  messagesByPeer: Message[]
 }
 

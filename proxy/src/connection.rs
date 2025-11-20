@@ -126,8 +126,6 @@ impl ConnectionHandler {
             self.connection_id,
             stats.bytes_inbound,
             stats.bytes_outbound,
-            stats.messages_inbound,
-            stats.messages_outbound,
         ).await {
             error!("[conn:{}] Failed to record disconnection in database: {}", self.connection_id, e);
         }
@@ -197,10 +195,34 @@ impl ConnectionHandler {
             Direction::Outbound => stats.messages_outbound += 1,
         }
 
+        // Determine source and destination peers based on direction
+        let (source_peer, destination_peer) = match direction {
+            Direction::Inbound => (self.client_addr.clone(), self.target_addr.clone()),
+            Direction::Outbound => (self.target_addr.clone(), self.client_addr.clone()),
+        };
+
+        let direction_str = match direction {
+            Direction::Inbound => "inbound",
+            Direction::Outbound => "outbound",
+        };
+
         info!(
-            "[conn:{}] {} {}",
-            self.connection_id, direction, msg.description()
+            "[conn:{}] {} {} (from {} to {})",
+            self.connection_id, direction, msg.description(), source_peer, destination_peer
         );
+
+        // Record message in database
+        if let Err(e) = self.app.record_message(
+            self.connection_id,
+            direction_str,
+            &source_peer,
+            &destination_peer,
+            msg.message_type(),
+            msg.payload_len as u64,
+            &msg.description(),
+        ).await {
+            warn!("[conn:{}] Failed to record message in database: {}", self.connection_id, e);
+        }
     }
 }
 

@@ -13,3 +13,6 @@ check-code: build-dashboard
 
 e2e: build-dashboard build
     ./scripts/run-e2e.sh
+
+run: build-dashboard
+    cargo run --bin nodescope-cli

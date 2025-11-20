@@ -1,6 +1,6 @@
 mod db;
 
-pub use db::{ConnectionStats, Database, PeerConnection};
+pub use db::{ConnectionStats, Database, Message, PeerConnection};
 
 use anyhow::Result;
 use std::path::Path;
@@ -39,15 +39,11 @@ impl NodeScopeApp {
         connection_id: u64,
         bytes_inbound: u64,
         bytes_outbound: u64,
-        messages_inbound: u64,
-        messages_outbound: u64,
     ) -> Result<()> {
         self.db.record_disconnection(
             connection_id,
             bytes_inbound,
             bytes_outbound,
-            messages_inbound,
-            messages_outbound,
         ).await
     }
 
@@ -64,5 +60,42 @@ impl NodeScopeApp {
     /// Get connection statistics
     pub async fn get_connection_stats(&self) -> Result<ConnectionStats> {
         self.db.get_connection_stats().await
+    }
+
+    /// Record an individual message
+    pub async fn record_message(
+        &self,
+        connection_id: u64,
+        direction: &str,
+        source_peer: &str,
+        destination_peer: &str,
+        message_type: &str,
+        payload_size: u64,
+        description: &str,
+    ) -> Result<i64> {
+        self.db.record_message(
+            connection_id,
+            direction,
+            source_peer,
+            destination_peer,
+            message_type,
+            payload_size,
+            description,
+        ).await
+    }
+
+    /// Get all messages for a specific connection
+    pub async fn get_messages_by_connection(&self, connection_id: u64) -> Result<Vec<Message>> {
+        self.db.get_messages_by_connection(connection_id).await
+    }
+
+    /// Get recent messages across all connections
+    pub async fn get_recent_messages(&self, limit: i64) -> Result<Vec<Message>> {
+        self.db.get_recent_messages(limit).await
+    }
+
+    /// Get messages by peer address
+    pub async fn get_messages_by_peer(&self, peer_addr: &str) -> Result<Vec<Message>> {
+        self.db.get_messages_by_peer(peer_addr).await
     }
 }

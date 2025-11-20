@@ -34,6 +34,48 @@ impl BitcoinMessage {
         self.command.as_ref()
     }
 
+    /// Get the message type from the NetworkMessage payload
+    pub fn message_type(&self) -> &'static str {
+        use bitcoin::p2p::message::NetworkMessage;
+
+        match self.raw_message.payload() {
+            NetworkMessage::Version(_) => "version",
+            NetworkMessage::Verack => "verack",
+            NetworkMessage::Addr(_) => "addr",
+            NetworkMessage::Inv(_) => "inv",
+            NetworkMessage::GetData(_) => "getdata",
+            NetworkMessage::NotFound(_) => "notfound",
+            NetworkMessage::GetBlocks(_) => "getblocks",
+            NetworkMessage::GetHeaders(_) => "getheaders",
+            NetworkMessage::Tx(_) => "tx",
+            NetworkMessage::Block(_) => "block",
+            NetworkMessage::Headers(_) => "headers",
+            NetworkMessage::GetAddr => "getaddr",
+            NetworkMessage::MemPool => "mempool",
+            NetworkMessage::Ping(_) => "ping",
+            NetworkMessage::Pong(_) => "pong",
+            NetworkMessage::SendHeaders => "sendheaders",
+            NetworkMessage::FeeFilter(_) => "feefilter",
+            NetworkMessage::SendCmpct(_) => "sendcmpct",
+            NetworkMessage::CmpctBlock(_) => "cmpctblock",
+            NetworkMessage::GetBlockTxn(_) => "getblocktxn",
+            NetworkMessage::BlockTxn(_) => "blocktxn",
+            NetworkMessage::GetCFilters(_) => "getcfilters",
+            NetworkMessage::CFilter(_) => "cfilter",
+            NetworkMessage::GetCFHeaders(_) => "getcfheaders",
+            NetworkMessage::CFHeaders(_) => "cfheaders",
+            NetworkMessage::GetCFCheckpt(_) => "getcfcheckpt",
+            NetworkMessage::CFCheckpt(_) => "cfcheckpt",
+            NetworkMessage::AddrV2(_) => "addrv2",
+            NetworkMessage::SendAddrV2 => "sendaddrv2",
+            NetworkMessage::WtxidRelay => "wtxidrelay",
+            NetworkMessage::Alert(_) => "alert",
+            NetworkMessage::Reject(_) => "reject",
+            NetworkMessage::Unknown { .. } => "unknown",
+            _ => "other",
+        }
+    }
+
     /// Get a detailed description of the message for logging
     pub fn description(&self) -> String {
         use bitcoin::p2p::message::NetworkMessage;

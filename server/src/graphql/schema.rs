@@ -29,6 +29,31 @@ impl Query {
         let stats = app.get_connection_stats().await?;
         Ok(stats.into())
     }
+
+    /// Get messages by connection ID
+    async fn messages_by_connection(
+        &self,
+        ctx: &Context<'_>,
+        connection_id: u64,
+    ) -> Result<Vec<Message>> {
+        let app = ctx.data::<NodeScopeApp>()?;
+        let messages = app.get_messages_by_connection(connection_id).await?;
+        Ok(messages.into_iter().map(Into::into).collect())
+    }
+
+    /// Get recent messages (limited)
+    async fn recent_messages(&self, ctx: &Context<'_>, #[graphql(default = 100)] limit: i32) -> Result<Vec<Message>> {
+        let app = ctx.data::<NodeScopeApp>()?;
+        let messages = app.get_recent_messages(limit as i64).await?;
+        Ok(messages.into_iter().map(Into::into).collect())
+    }
+
+    /// Get messages by peer address
+    async fn messages_by_peer(&self, ctx: &Context<'_>, peer_addr: String) -> Result<Vec<Message>> {
+        let app = ctx.data::<NodeScopeApp>()?;
+        let messages = app.get_messages_by_peer(&peer_addr).await?;
+        Ok(messages.into_iter().map(Into::into).collect())
+    }
 }
 
 /// GraphQL representation of a peer connection
@@ -42,8 +67,6 @@ pub struct PeerConnection {
     pub disconnected_at: Option<String>,
     pub bytes_inbound: Option<u64>,
     pub bytes_outbound: Option<u64>,
-    pub messages_inbound: Option<u64>,
-    pub messages_outbound: Option<u64>,
 }
 
 impl From<app::PeerConnection> for PeerConnection {
@@ -57,8 +80,36 @@ impl From<app::PeerConnection> for PeerConnection {
             disconnected_at: conn.disconnected_at.map(|dt| dt.to_rfc3339()),
             bytes_inbound: conn.bytes_inbound,
             bytes_outbound: conn.bytes_outbound,
-            messages_inbound: conn.messages_inbound,
-            messages_outbound: conn.messages_outbound,
+        }
+    }
+}
+
+/// GraphQL representation of a message
+#[derive(SimpleObject)]
+pub struct Message {
+    pub id: i64,
+    pub connection_id: u64,
+    pub timestamp: String,
+    pub direction: String,
+    pub source_peer: String,
+    pub destination_peer: String,
+    pub message_type: String,
+    pub payload_size: u64,
+    pub description: String,
+}
+
+impl From<app::Message> for Message {
+    fn from(msg: app::Message) -> Self {
+        Self {
+            id: msg.id,
+            connection_id: msg.connection_id,
+            timestamp: msg.timestamp.to_rfc3339(),
+            direction: msg.direction,
+            source_peer: msg.source_peer,
+            destination_peer: msg.destination_peer,
+            message_type: msg.message_type.as_str().to_string(),
+            payload_size: msg.payload_size,
+            description: msg.description,
         }
     }
 }
