@@ -1,9 +1,10 @@
 use crate::bitcoin_protocol::{BitcoinMessage, MessageParser, Network};
 use anyhow::Context;
+use app::NodeScopeApp;
 use std::sync::Arc;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
-use tracing::{debug, info, warn};
+use tracing::{debug, info, warn, error};
 
 /// Represents a direction of traffic flow
 #[derive(Debug, Clone, Copy)]
@@ -37,16 +38,24 @@ pub struct ConnectionHandler {
     target_addr: String,
     network: Network,
     stats: Arc<tokio::sync::Mutex<ConnectionStats>>,
+    app: NodeScopeApp,
 }
 
 impl ConnectionHandler {
-    pub fn new(connection_id: u64, client_addr: String, target_addr: String, network: Network) -> Self {
+    pub fn new(
+        connection_id: u64,
+        client_addr: String,
+        target_addr: String,
+        network: Network,
+        app: NodeScopeApp,
+    ) -> Self {
         Self {
             connection_id,
             client_addr,
             target_addr,
             network,
             stats: Arc::new(tokio::sync::Mutex::new(ConnectionStats::default())),
+            app,
         }
     }
 
@@ -60,6 +69,15 @@ impl ConnectionHandler {
             "[conn:{}] Established: {} <-> {}",
             self.connection_id, self.client_addr, self.target_addr
         );
+
+        // Record connection in database
+        if let Err(e) = self.app.record_connection(
+            self.connection_id,
+            &self.client_addr,
+            &self.target_addr,
+        ).await {
+            error!("[conn:{}] Failed to record connection in database: {}", self.connection_id, e);
+        }
 
         // Split both streams into read/write halves
         let (client_read, client_write) = client.split();
@@ -102,6 +120,17 @@ impl ConnectionHandler {
             stats.bytes_outbound,
             stats.messages_outbound
         );
+
+        // Record disconnection in database
+        if let Err(e) = self.app.record_disconnection(
+            self.connection_id,
+            stats.bytes_inbound,
+            stats.bytes_outbound,
+            stats.messages_inbound,
+            stats.messages_outbound,
+        ).await {
+            error!("[conn:{}] Failed to record disconnection in database: {}", self.connection_id, e);
+        }
 
         Ok(())
     }

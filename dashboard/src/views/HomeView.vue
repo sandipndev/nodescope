@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import TheWelcome from '../components/TheWelcome.vue'
+import PeerConnectionsList from '../components/PeerConnectionsList.vue'
 </script>
 
 <template>
   <main>
-    <TheWelcome />
+    <PeerConnectionsList />
   </main>
 </template>

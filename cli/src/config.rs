@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use anyhow::Context;
 use serde::{Deserialize, Serialize};
@@ -10,6 +10,12 @@ pub struct Config {
     pub server: server::ServerConfig,
     #[serde(default)]
     pub proxy: proxy::ProxyConfig,
+    #[serde(default = "default_database_path")]
+    pub database_path: PathBuf,
+}
+
+fn default_database_path() -> PathBuf {
+    PathBuf::from("nodescope.db")
 }
 
 impl Config {

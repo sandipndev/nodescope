@@ -47,7 +47,7 @@ pub async fn run() -> anyhow::Result<()> {
 }
 
 async fn run_app(config: Config) -> anyhow::Result<()> {
-    let app = app::NodeScopeApp::new();
+    let app = app::NodeScopeApp::new(&config.database_path).await?;
 
     tokio::try_join!(
         async {

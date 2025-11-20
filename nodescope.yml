@@ -5,3 +5,7 @@ proxy:
 server:
   port: 6789
 
+# SQLite database path for storing peer connection data
+# Defaults to "nodescope.db" if not specified
+database_path: nodescope.db
+

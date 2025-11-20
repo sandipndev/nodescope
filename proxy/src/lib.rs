@@ -15,7 +15,7 @@ use tracing::{error, info, warn};
 /// Bitcoin P2P Proxy Server
 pub struct ProxyServer {
     config: ProxyConfig,
-    _app: NodeScopeApp,
+    app: NodeScopeApp,
     connection_counter: Arc<AtomicU64>,
 }
 
@@ -23,7 +23,7 @@ impl ProxyServer {
     pub fn new(config: ProxyConfig, app: NodeScopeApp) -> Self {
         Self {
             config,
-            _app: app,
+            app,
             connection_counter: Arc::new(AtomicU64::new(0)),
         }
     }
@@ -39,6 +39,7 @@ impl ProxyServer {
         );
 
         let network: bitcoin_protocol::Network = self.config.network.into();
+        let app = self.app.clone();
 
         loop {
             match listener.accept().await {
@@ -51,9 +52,10 @@ impl ProxyServer {
                     );
 
                     // Spawn a task to handle this connection
+                    let app_clone = app.clone();
                     tokio::spawn(async move {
                         if let Err(e) =
-                            handle_connection(connection_id, client_stream, network).await
+                            handle_connection(connection_id, client_stream, network, app_clone).await
                         {
                             error!("[conn:{}] Connection error: {}", connection_id, e);
                         }
@@ -72,6 +74,7 @@ async fn handle_connection(
     connection_id: u64,
     mut client_stream: TcpStream,
     network: bitcoin_protocol::Network,
+    app: NodeScopeApp,
 ) -> anyhow::Result<()> {
     let client_addr = client_stream.peer_addr()?.to_string();
 
@@ -92,7 +95,7 @@ async fn handle_connection(
     };
 
     // Create and run the connection handler
-    let handler = ConnectionHandler::new(connection_id, client_addr, target, network);
+    let handler = ConnectionHandler::new(connection_id, client_addr, target, network, app);
     handler.handle(client_stream, target_stream).await
 }
 

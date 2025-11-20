@@ -5,8 +5,12 @@ pub use schema::*;
 
 use app::NodeScopeApp;
 
-pub fn schema(_app: Option<NodeScopeApp>) -> Schema<Query, EmptyMutation, EmptySubscription> {
-    let schema_builder = Schema::build(Query, EmptyMutation, EmptySubscription);
+pub fn schema(app: Option<NodeScopeApp>) -> Schema<Query, EmptyMutation, EmptySubscription> {
+    let mut schema_builder = Schema::build(Query, EmptyMutation, EmptySubscription);
+
+    if let Some(app) = app {
+        schema_builder = schema_builder.data(app);
+    }
 
     // TODO: Use dataloader
 
